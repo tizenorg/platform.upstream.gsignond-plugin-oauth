@@ -1,0 +1,1251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>gsignond-plugin-oauth Reference Manual: GSignondOauthPlugin</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
+<link rel="home" href="index.html" title="gsignond-plugin-oauth Reference Manual">
+<link rel="up" href="ch01.html" title="Plugin reference">
+<link rel="prev" href="ch01.html" title="Plugin reference">
+<link rel="next" href="object-tree.html" title="Object Hierarchy">
+<meta name="generator" content="GTK-Doc V1.20 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="10"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description"> <span class="dim">|</span> 
+                  <a href="#GSignondOauthPlugin.description" class="shortcut">Description</a></span><span id="nav_hierarchy"> <span class="dim">|</span> 
+                  <a href="#GSignondOauthPlugin.object-hierarchy" class="shortcut">Object Hierarchy</a></span><span id="nav_interfaces"> <span class="dim">|</span> 
+                  <a href="#GSignondOauthPlugin.implemented-interfaces" class="shortcut">Implemented Interfaces</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ch01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="ch01.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="object-tree.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="refentry">
+<a name="GSignondOauthPlugin"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="GSignondOauthPlugin.top_of_page"></a>GSignondOauthPlugin</span></h2>
+<p>GSignondOauthPlugin — OAuth1/OAuth2 authentication plugin for gSSO single sign-on service</p>
+</td>
+<td class="gallery_image" valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsect1">
+<a name="GSignondOauthPlugin.other"></a><h2>Types and Values</h2>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="name">
+<col class="description">
+</colgroup>
+<tbody>
+<tr>
+<td class="datatype_keyword">struct</td>
+<td class="function_name"><a class="link" href="GSignondOauthPlugin.html#GSignondOauthPlugin-struct" title="struct GSignondOauthPlugin">GSignondOauthPlugin</a></td>
+</tr>
+<tr>
+<td class="datatype_keyword">struct</td>
+<td class="function_name"><a class="link" href="GSignondOauthPlugin.html#GSignondOauthPluginClass" title="struct GSignondOauthPluginClass">GSignondOauthPluginClass</a></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="refsect1">
+<a name="GSignondOauthPlugin.object-hierarchy"></a><h2>Object Hierarchy</h2>
+<pre class="screen">    <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject">GObject</a>
+    <span class="lineart">╰──</span> GSignondOauthPlugin
+</pre>
+</div>
+<div class="refsect1">
+<a name="GSignondOauthPlugin.implemented-interfaces"></a><h2>Implemented Interfaces</h2>
+<p>
+GSignondOauthPlugin implements
+ <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html">GSignondPlugin</a>.</p>
+</div>
+<div class="refsect1">
+<a name="GSignondOauthPlugin.description"></a><h2>Description</h2>
+<p>The OAuth plugin provides a client-side implementation of OAuth 1 and OAuth 2
+authorization protocols. The overall flow is that the plugin is requested to
+perform authorization using supplied authorization parameters, and if it has
+succeeded in doing so, it returns a token string to the application that can
+be used to access protected resources over https. The plugin is not involved
+in accessing protected resources, only in initial authorization.</p>
+<p>OAuth1 is specified in <a class="ulink" href="http://tools.ietf.org/html/rfc5849" target="_top">RFC 5849</a>,
+OAuth2 is specified in <a class="ulink" href="http://tools.ietf.org/html/rfc6749" target="_top">RFC 6749</a>
+(with additional info regarding the basic bearer token type in <a class="ulink" href="http://tools.ietf.org/html/rfc6750" target="_top">RFC6750</a>). The two versions are
+not compatible and specify significantly different authorization sequences, for
+that reason they are implemented as separate mechanisms in the plugin.</p>
+<p>The plugin implements the standard <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html"><span class="type">GSignondPlugin</span></a> interface, and after instantiating
+a plugin object all interactions happen through that interface.</p>
+<p><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#GSignondPlugin--type"><span class="type">“type”</span></a> property of the plugin object is set to "oauth".</p>
+<p><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#GSignondPlugin--mechanisms"><span class="type">“mechanisms”</span></a> property of the plugin object is a list of "oauth1" and "oauth2".</p>
+<div class="refsect1">
+<a name="id-1.2.2.6.7"></a><h2>Authorization sequence</h2>
+</div>
+<p>The authorization sequence begins with issuing <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial"><code class="function">gsignond_plugin_request_initial()</code></a>.
+The <em class="parameter"><code>mechanism</code></em>
+ parameter should be set to "oauth1" or "oauth2", and
+the contents of <em class="parameter"><code>session_data</code></em>
+ and <em class="parameter"><code>identity_method_cache</code></em>
+ parameters depend 
+on the mechanism and are described in detail below.</p>
+<p>The plugin responds to the request with one of the following signals:</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#GSignondPlugin-response-final"><span class="type">“response-final”</span></a> This means the authorization sequence ended
+successfully, and the authorization token is delivered in <em class="parameter"><code>session_data</code></em>
+ parameter
+of the signal. This signal concludes the sequence.</p></li>
+<li class="listitem"><p><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#GSignondPlugin-user-action-required"><span class="type">“user-action-required”</span></a> The plugin is requesting to perform a 
+user authorization procedure by opening a webpage in a user-agent (browser) where the user is expected
+to enter her credentials. Parameters for this step are specified in <em class="parameter"><code>ui_data</code></em>
+.
+After the user interaction has completed, the results are returned to the 
+plugin with <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-user-action-finished"><code class="function">gsignond_plugin_user_action_finished()</code></a> method, and the authorization
+process continues.</p></li>
+<li class="listitem"><p><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#GSignondPlugin-store"><span class="type">“store”</span></a> The plugin is requesting to replace the token cache
+with the contents of <em class="parameter"><code>identity_method_cache</code></em>
+ parameter. There is no need to respond to this
+signal; the authorization process continues immediately.</p></li>
+<li class="listitem"><p><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#GSignondPlugin-error"><span class="type">“error”</span></a> An error has happened in the authorization sequence 
+and it stops.
+Typical errors are <code class="literal">GSIGNOND_ERROR_MISSING_DATA</code> which means there wasn't enough
+data provided in <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial"><code class="function">gsignond_plugin_request_initial()</code></a> to perform the authorization,
+<code class="literal">GSIGNOND_ERROR_NOT_AUTHORIZED</code> which means the server rejected the 
+authorization attempt, <code class="literal">GSIGNOND_ERROR_USER_INTERACTION</code> which means there
+was an error during interaction with the user.</p></li>
+</ul></div>
+<p>At any point the application can request to stop the authorization by calling
+<a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-cancel"><code class="function">gsignond_plugin_cancel()</code></a>. The plugin responds with an <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#GSignondPlugin-error"><span class="type">“error”</span></a> signal
+containing a <code class="literal">GSIGNOND_ERROR_SESSION_CANCELED</code> error.</p>
+<div class="refsect1">
+<a name="id-1.2.2.6.12"></a><h2>Code examples</h2>
+</div>
+<div class="example">
+<a name="id-1.2.2.6.13"></a><p class="title"><b>Example 1. Using OAuth1</b></p>
+<div class="example-contents">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="comment">/* PLEASE NOTE: this example is meant for OAuth plugin developers. If you're</span>
+<span class="comment"> * an application developer who wants to use this plugin, please refer to</span>
+<span class="comment"> * libgsignon-glib documentation here:</span>
+<span class="comment"> * http://gsignon-docs.accounts-sso.googlecode.com/git/libgsignon-glib/index.html</span>
+<span class="comment"> */</span>
+<span class="comment">/*</span>
+<span class="comment"> * Copyright (C) 2012 Intel Corporation.</span>
+<span class="comment"> *</span>
+<span class="comment"> * Contact: Alexander Kanavin &lt;alex.kanavin&#64;gmail.com&gt;</span>
+<span class="comment"> *</span>
+<span class="comment"> * This library is free software; you can redistribute it and/or</span>
+<span class="comment"> * modify it under the terms of the GNU Lesser General Public</span>
+<span class="comment"> * License as published by the Free Software Foundation; either</span>
+<span class="comment"> * version 2.1 of the License, or (at your option) any later version.</span>
+<span class="comment"> *</span>
+<span class="comment"> * This library is distributed in the hope that it will be useful,</span>
+<span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU</span>
+<span class="comment"> * Lesser General Public License for more details.</span>
+<span class="comment"> *</span>
+<span class="comment"> * You should have received a copy of the GNU Lesser General Public</span>
+<span class="comment"> * License along with this library; if not, write to the Free Software</span>
+<span class="comment"> * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA</span>
+<span class="comment"> * 02110-1301 USA</span>
+<span class="comment"> */</span>
+
+<span class="gtkdoc ppc">#include &lt;gsignond/gsignond-session-data.h&gt;</span>
+<span class="gtkdoc ppc">#include &lt;gsignond/gsignond-plugin-interface.h&gt;</span>
+<span class="gtkdoc ppc">#include &lt;gsignond/gsignond-error.h&gt;</span>
+<span class="gtkdoc ppc">#include &lt;gsignond/gsignond-utils.h&gt;</span>
+<span class="gtkdoc ppc">#include</span> <span class="gtkdoc pps">&quot;gsignond-oauth-plugin.h&quot;</span><span class="gtkdoc ppc"></span>
+
+<span class="gtkdoc slc">// this function returns a token for the token cache</span>
+<span class="gtkdoc kwb">static</span> GVariant<span class="gtkdoc opt">*</span> <span class="function">make_normal_token</span><span class="gtkdoc opt">()</span>
+<span class="gtkdoc opt">{</span>
+    GSignondDictionary<span class="gtkdoc opt">*</span> token <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-new">gsignond_dictionary_new</a></span><span class="gtkdoc opt">();</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>token<span class="gtkdoc opt">,</span> <span class="string">&quot;AccessToken&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;megaaccesstoken&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>token<span class="gtkdoc opt">,</span> <span class="string">&quot;TokenSecret&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;megatokensecret&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>token<span class="gtkdoc opt">,</span> <span class="string">&quot;Realm&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;megarealm&quot;</span><span class="gtkdoc opt">);</span>
+    GVariant<span class="gtkdoc opt">*</span> token_var <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-to-variant">gsignond_dictionary_to_variant</a></span><span class="gtkdoc opt">(</span>token<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-unref">gsignond_dictionary_unref</a></span><span class="gtkdoc opt">(</span>token<span class="gtkdoc opt">);</span>
+    <span class="keyword">return</span> token_var<span class="gtkdoc opt">;</span>
+<span class="gtkdoc opt">}</span>
+
+<span class="gtkdoc slc">//this function makes a token cache with one unrelated token</span>
+<span class="gtkdoc slc">//(because it belongs to a different consumer key)</span>
+<span class="gtkdoc kwb">static</span> GSignondDictionary<span class="gtkdoc opt">*</span> <span class="function">make_token_cache</span><span class="gtkdoc opt">()</span>
+<span class="gtkdoc opt">{</span>
+    GSignondDictionary<span class="gtkdoc opt">*</span> tokens <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-new">gsignond_dictionary_new</a></span><span class="gtkdoc opt">();</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set">gsignond_dictionary_set</a></span><span class="gtkdoc opt">(</span>tokens<span class="gtkdoc opt">,</span> <span class="string">&quot;someotherclient&quot;</span><span class="gtkdoc opt">,</span> <span class="function">make_normal_token</span><span class="gtkdoc opt">());</span>
+    <span class="keyword">return</span> tokens<span class="gtkdoc opt">;</span>
+<span class="gtkdoc opt">}</span>
+
+<span class="gtkdoc slc">//this callback prints the received token and exits the mainloop</span>
+<span class="gtkdoc kwb">static void</span> <span class="function">response_callback</span><span class="gtkdoc opt">(</span>GSignondPlugin<span class="gtkdoc opt">*</span> plugin<span class="gtkdoc opt">,</span> GSignondSessionData<span class="gtkdoc opt">*</span> result<span class="gtkdoc opt">,</span>
+                     gpointer user_data<span class="gtkdoc opt">)</span>
+<span class="gtkdoc opt">{</span>
+    GVariant<span class="gtkdoc opt">*</span> token_variant <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-to-variant">gsignond_dictionary_to_variant</a></span><span class="gtkdoc opt">(</span>result<span class="gtkdoc opt">);</span>
+    gchar<span class="gtkdoc opt">*</span> token_str <span class="gtkdoc opt">=</span> <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-GVariant.html#g-variant-print">g_variant_print</a></span><span class="gtkdoc opt">(</span>token_variant<span class="gtkdoc opt">,</span> TRUE<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Warnings-and-Assertions.html#g-print">g_print</a></span><span class="gtkdoc opt">(</span><span class="string">&quot;Authenticated successfully, got token:</span><span class="gtkdoc esc">\n</span><span class="string">%s</span><span class="gtkdoc esc">\n</span><span class="string">&quot;</span><span class="gtkdoc opt">,</span>
+             token_str<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Memory-Allocation.html#g-free">g_free</a></span><span class="gtkdoc opt">(</span>token_str<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-GVariant.html#g-variant-unref">g_variant_unref</a></span><span class="gtkdoc opt">(</span>token_variant<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#g-main-loop-quit">g_main_loop_quit</a></span><span class="gtkdoc opt">(</span>user_data<span class="gtkdoc opt">);</span>    
+<span class="gtkdoc opt">}</span>
+
+<span class="gtkdoc slc">//this function prints the content of the updated token cache</span>
+<span class="gtkdoc kwb">static void</span> <span class="function">store_callback</span><span class="gtkdoc opt">(</span>GSignondPlugin<span class="gtkdoc opt">*</span> plugin<span class="gtkdoc opt">,</span> GSignondSessionData<span class="gtkdoc opt">*</span> result<span class="gtkdoc opt">,</span>
+                     gpointer user_data<span class="gtkdoc opt">)</span>
+<span class="gtkdoc opt">{</span>
+    GVariant<span class="gtkdoc opt">*</span> token_variant <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-to-variant">gsignond_dictionary_to_variant</a></span><span class="gtkdoc opt">(</span>result<span class="gtkdoc opt">);</span>
+    gchar<span class="gtkdoc opt">*</span> token_str <span class="gtkdoc opt">=</span> <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-GVariant.html#g-variant-print">g_variant_print</a></span><span class="gtkdoc opt">(</span>token_variant<span class="gtkdoc opt">,</span> TRUE<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Warnings-and-Assertions.html#g-print">g_print</a></span><span class="gtkdoc opt">(</span><span class="string">&quot;Should replace the token cache with the following:</span><span class="gtkdoc esc">\n</span><span class="string">%s</span><span class="gtkdoc esc">\n</span><span class="string">&quot;</span><span class="gtkdoc opt">,</span>
+             token_str<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Memory-Allocation.html#g-free">g_free</a></span><span class="gtkdoc opt">(</span>token_str<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-GVariant.html#g-variant-unref">g_variant_unref</a></span><span class="gtkdoc opt">(</span>token_variant<span class="gtkdoc opt">);</span>
+<span class="gtkdoc opt">}</span>
+
+<span class="gtkdoc slc">//this function shows what the UI interaction component needs to do</span>
+<span class="gtkdoc kwb">static void</span> <span class="function">user_action_required_callback</span><span class="gtkdoc opt">(</span>GSignondPlugin<span class="gtkdoc opt">*</span> plugin<span class="gtkdoc opt">,</span> 
+                                          GSignondSignonuiData<span class="gtkdoc opt">*</span> ui_request<span class="gtkdoc opt">,</span> 
+                                          gpointer user_data<span class="gtkdoc opt">)</span>
+<span class="gtkdoc opt">{</span>
+    <span class="gtkdoc slc">// ui_request typically contains a URI that needs to be opened, </span>
+    <span class="gtkdoc slc">// and a redirect URI that needs to be 'captured' by the user-agent and </span>
+    <span class="gtkdoc slc">// reported back to the plugin</span>
+    <span class="gtkdoc slc">// in practice the ui_request needs to be handed over to a user-agent</span>
+    <span class="gtkdoc slc">// but here we simply print it    </span>
+    GVariant<span class="gtkdoc opt">*</span> token_variant <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-to-variant">gsignond_dictionary_to_variant</a></span><span class="gtkdoc opt">(</span>ui_request<span class="gtkdoc opt">);</span>
+    gchar<span class="gtkdoc opt">*</span> token_str <span class="gtkdoc opt">=</span> <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-GVariant.html#g-variant-print">g_variant_print</a></span><span class="gtkdoc opt">(</span>token_variant<span class="gtkdoc opt">,</span> TRUE<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Warnings-and-Assertions.html#g-print">g_print</a></span><span class="gtkdoc opt">(</span><span class="string">&quot;Got a UI interaction request:</span><span class="gtkdoc esc">\n</span><span class="string">%s</span><span class="gtkdoc esc">\n</span><span class="string">&quot;</span><span class="gtkdoc opt">,</span>
+             token_str<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Memory-Allocation.html#g-free">g_free</a></span><span class="gtkdoc opt">(</span>token_str<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-GVariant.html#g-variant-unref">g_variant_unref</a></span><span class="gtkdoc opt">(</span>token_variant<span class="gtkdoc opt">);</span>
+    
+    <span class="gtkdoc slc">// in practice the following should be received from a user-agent,</span>
+    <span class="gtkdoc slc">// but in this example for the sake of simplicity we report the hardcoded redirect</span>
+    <span class="gtkdoc slc">// URI (with additional parameters) immidiately back to the plugin</span>
+    GSignondSignonuiData<span class="gtkdoc opt">*</span> ui_data <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-new">gsignond_dictionary_new</a></span><span class="gtkdoc opt">();</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondSignonuiData.html#gsignond-signonui-data-set-url-response">gsignond_signonui_data_set_url_response</a></span><span class="gtkdoc opt">(</span>ui_data<span class="gtkdoc opt">,</span> 
+<span class="string">&quot;http://somehost/somegsignondoauthcallback?oauth_token=somerandomtoken&amp;oauth_verifier=somerandomverifier&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondSignonuiData.html#gsignond-signonui-data-set-query-error">gsignond_signonui_data_set_query_error</a></span><span class="gtkdoc opt">(</span>ui_data<span class="gtkdoc opt">,</span> SIGNONUI_ERROR_NONE<span class="gtkdoc opt">);</span>
+
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-user-action-finished">gsignond_plugin_user_action_finished</a></span><span class="gtkdoc opt">(</span>plugin<span class="gtkdoc opt">,</span> ui_data<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-unref">gsignond_dictionary_unref</a></span><span class="gtkdoc opt">(</span>ui_data<span class="gtkdoc opt">);</span>
+<span class="gtkdoc opt">}</span>
+
+<span class="gtkdoc slc">// print an error and exit the mainloop</span>
+<span class="gtkdoc kwb">static void</span> <span class="function">error_callback</span><span class="gtkdoc opt">(</span>GSignondPlugin<span class="gtkdoc opt">*</span> plugin<span class="gtkdoc opt">,</span> GError<span class="gtkdoc opt">*</span> error<span class="gtkdoc opt">,</span>
+                     gpointer user_data<span class="gtkdoc opt">)</span>
+<span class="gtkdoc opt">{</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Warnings-and-Assertions.html#g-print">g_print</a></span><span class="gtkdoc opt">(</span><span class="string">&quot;Got an error: %s</span><span class="gtkdoc esc">\n</span><span class="string">&quot;</span><span class="gtkdoc opt">,</span> error<span class="gtkdoc opt">-&gt;</span>message<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#g-main-loop-quit">g_main_loop_quit</a></span><span class="gtkdoc opt">(</span>user_data<span class="gtkdoc opt">);</span>
+<span class="gtkdoc opt">}</span>
+
+
+<span class="gtkdoc kwb">int</span> <span class="function">main</span> <span class="gtkdoc opt">(</span><span class="gtkdoc kwb">void</span><span class="gtkdoc opt">)</span>
+<span class="gtkdoc opt">{</span>
+<span class="gtkdoc ppc">#if !GLIB_CHECK_VERSION (2, 36, 0)</span>
+    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#g-type-init">g_type_init</a></span> <span class="gtkdoc opt">();</span>
+<span class="gtkdoc ppc">#endif</span>
+
+    gpointer plugin <span class="gtkdoc opt">=</span> <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#g-object-new">g_object_new</a></span><span class="gtkdoc opt">(</span><span class="function">gsignond_oauth_plugin_get_type</span><span class="gtkdoc opt">(),</span> NULL<span class="gtkdoc opt">);</span>
+
+    GMainLoop <span class="gtkdoc opt">*</span>main_loop <span class="gtkdoc opt">=</span> <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#g-main-loop-new">g_main_loop_new</a></span> <span class="gtkdoc opt">(</span>NULL<span class="gtkdoc opt">,</span> FALSE<span class="gtkdoc opt">);</span>    
+
+    <span class="gtkdoc slc">//connect to various signals of the plugin object</span>
+    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Signals.html#g-signal-connect">g_signal_connect</a></span><span class="gtkdoc opt">(</span>plugin<span class="gtkdoc opt">,</span> <span class="string">&quot;response-final&quot;</span><span class="gtkdoc opt">,</span> <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Closures.html#G-CALLBACK:CAPS">G_CALLBACK</a></span><span class="gtkdoc opt">(</span>response_callback<span class="gtkdoc opt">),</span> main_loop<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Signals.html#g-signal-connect">g_signal_connect</a></span><span class="gtkdoc opt">(</span>plugin<span class="gtkdoc opt">,</span> <span class="string">&quot;user-action-required&quot;</span><span class="gtkdoc opt">,</span> 
+                     <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Closures.html#G-CALLBACK:CAPS">G_CALLBACK</a></span><span class="gtkdoc opt">(</span>user_action_required_callback<span class="gtkdoc opt">),</span> NULL<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Signals.html#g-signal-connect">g_signal_connect</a></span><span class="gtkdoc opt">(</span>plugin<span class="gtkdoc opt">,</span> <span class="string">&quot;store&quot;</span><span class="gtkdoc opt">,</span> <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Closures.html#G-CALLBACK:CAPS">G_CALLBACK</a></span><span class="gtkdoc opt">(</span>store_callback<span class="gtkdoc opt">),</span> NULL<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Signals.html#g-signal-connect">g_signal_connect</a></span><span class="gtkdoc opt">(</span>plugin<span class="gtkdoc opt">,</span> <span class="string">&quot;error&quot;</span><span class="gtkdoc opt">,</span> <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Closures.html#G-CALLBACK:CAPS">G_CALLBACK</a></span><span class="gtkdoc opt">(</span>error_callback<span class="gtkdoc opt">),</span> main_loop<span class="gtkdoc opt">);</span>
+
+    GSignondSessionData<span class="gtkdoc opt">*</span> data <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-new">gsignond_dictionary_new</a></span><span class="gtkdoc opt">();</span>
+    GSignondDictionary<span class="gtkdoc opt">*</span> token_cache <span class="gtkdoc opt">=</span> <span class="function">make_token_cache</span><span class="gtkdoc opt">();</span>
+
+    <span class="gtkdoc slc">//fill in necessary data for OAuth1 authorization</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> <span class="string">&quot;ConsumerKey&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;megaclient&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> <span class="string">&quot;ConsumerSecret&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;megasecret&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> <span class="string">&quot;Realm&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;megarealm&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondSessionData.html#gsignond-session-data-set-ui-policy">gsignond_session_data_set_ui_policy</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> GSIGNOND_UI_POLICY_DEFAULT<span class="gtkdoc opt">);</span>
+    
+    <span class="gtkdoc kwb">const</span> gchar <span class="gtkdoc opt">*</span>realm_list<span class="gtkdoc opt">[] = {</span> <span class="string">&quot;somehost&quot;</span><span class="gtkdoc opt">,</span> NULL <span class="gtkdoc opt">};</span>
+    GSequence <span class="gtkdoc opt">*</span>allowed_realms <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-Utility-functions.html#gsignond-copy-array-to-sequence">gsignond_copy_array_to_sequence</a></span><span class="gtkdoc opt">(</span>realm_list<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondSessionData.html#gsignond-session-data-set-allowed-realms">gsignond_session_data_set_allowed_realms</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> allowed_realms<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Sequences.html#g-sequence-free">g_sequence_free</a></span><span class="gtkdoc opt">(</span>allowed_realms<span class="gtkdoc opt">);</span>
+    
+    <span class="gtkdoc slc">// can also be HMAC-SHA1, or RSA-SHA1 (in the latter case, also RSAPrivateKey</span>
+    <span class="gtkdoc slc">// needs to be set</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> <span class="string">&quot;SignatureMethod&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;PLAINTEXT&quot;</span><span class="gtkdoc opt">);</span>
+    
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> <span class="string">&quot;RequestEndpoint&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;https://somehost/temporarytokenpath&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> <span class="string">&quot;AuthorizationEndpoint&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;https://somehost/authorization&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> <span class="string">&quot;Callback&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;http://somehost/somegsignondoauthcallback&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> <span class="string">&quot;TokenEndpoint&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;https://somehost/accesstokenpath&quot;</span><span class="gtkdoc opt">);</span>
+ 
+    <span class="gtkdoc slc">//start the authorization and run the mainloop</span>
+    <span class="gtkdoc slc">//any further processing happens in signal callbacks</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial">gsignond_plugin_request_initial</a></span><span class="gtkdoc opt">(</span>plugin<span class="gtkdoc opt">,</span> data<span class="gtkdoc opt">,</span> token_cache<span class="gtkdoc opt">,</span> <span class="string">&quot;oauth1&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-unref">gsignond_dictionary_unref</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-unref">gsignond_dictionary_unref</a></span><span class="gtkdoc opt">(</span>token_cache<span class="gtkdoc opt">);</span>
+    
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#g-main-loop-run">g_main_loop_run</a></span> <span class="gtkdoc opt">(</span>main_loop<span class="gtkdoc opt">);</span>
+    
+    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#g-object-unref">g_object_unref</a></span><span class="gtkdoc opt">(</span>plugin<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#g-main-loop-unref">g_main_loop_unref</a></span><span class="gtkdoc opt">(</span>main_loop<span class="gtkdoc opt">);</span>
+    
+    <span class="keyword">return</span> <span class="number">0</span><span class="gtkdoc opt">;</span>
+<span class="gtkdoc opt">}</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+</div>
+<br class="example-break"><div class="example">
+<a name="id-1.2.2.6.14"></a><p class="title"><b>Example 2. Using OAuth2</b></p>
+<div class="example-contents">
+  <table class="listing_frame" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+      <tr>
+        <td class="listing_lines" align="right"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177</pre></td>
+        <td class="listing_code"><pre class="programlisting"><span class="comment">/* PLEASE NOTE: this example is meant for OAuth plugin developers. If you're</span>
+<span class="comment"> * an application developer who wants to use this plugin, please refer to</span>
+<span class="comment"> * libgsignon-glib documentation here:</span>
+<span class="comment"> * http://gsignon-docs.accounts-sso.googlecode.com/git/libgsignon-glib/index.html</span>
+<span class="comment"> */</span>
+<span class="comment">/*</span>
+<span class="comment"> * Copyright (C) 2012 Intel Corporation.</span>
+<span class="comment"> *</span>
+<span class="comment"> * Contact: Alexander Kanavin &lt;alex.kanavin&#64;gmail.com&gt;</span>
+<span class="comment"> *</span>
+<span class="comment"> * This library is free software; you can redistribute it and/or</span>
+<span class="comment"> * modify it under the terms of the GNU Lesser General Public</span>
+<span class="comment"> * License as published by the Free Software Foundation; either</span>
+<span class="comment"> * version 2.1 of the License, or (at your option) any later version.</span>
+<span class="comment"> *</span>
+<span class="comment"> * This library is distributed in the hope that it will be useful,</span>
+<span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU</span>
+<span class="comment"> * Lesser General Public License for more details.</span>
+<span class="comment"> *</span>
+<span class="comment"> * You should have received a copy of the GNU Lesser General Public</span>
+<span class="comment"> * License along with this library; if not, write to the Free Software</span>
+<span class="comment"> * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA</span>
+<span class="comment"> * 02110-1301 USA</span>
+<span class="comment"> */</span>
+
+<span class="gtkdoc ppc">#include &lt;gsignond/gsignond-session-data.h&gt;</span>
+<span class="gtkdoc ppc">#include &lt;gsignond/gsignond-plugin-interface.h&gt;</span>
+<span class="gtkdoc ppc">#include &lt;gsignond/gsignond-error.h&gt;</span>
+<span class="gtkdoc ppc">#include &lt;gsignond/gsignond-utils.h&gt;</span>
+<span class="gtkdoc ppc">#include</span> <span class="gtkdoc pps">&quot;gsignond-oauth-plugin.h&quot;</span><span class="gtkdoc ppc"></span>
+
+
+<span class="gtkdoc slc">// this function returns a token for the token cache</span>
+<span class="gtkdoc kwb">static</span> GVariant<span class="gtkdoc opt">*</span> <span class="function">make_normal_token</span><span class="gtkdoc opt">()</span>
+<span class="gtkdoc opt">{</span>
+    GSignondDictionary<span class="gtkdoc opt">*</span> token <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-new">gsignond_dictionary_new</a></span><span class="gtkdoc opt">();</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>token<span class="gtkdoc opt">,</span> <span class="string">&quot;AccessToken&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;megaaccesstoken&quot;</span><span class="gtkdoc opt">);</span>
+    GDateTime<span class="gtkdoc opt">*</span> now <span class="gtkdoc opt">=</span> <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-GDateTime.html#g-date-time-new-now-utc">g_date_time_new_now_utc</a></span><span class="gtkdoc opt">();</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-int64">gsignond_dictionary_set_int64</a></span><span class="gtkdoc opt">(</span>token<span class="gtkdoc opt">,</span> <span class="string">&quot;Timestamp&quot;</span><span class="gtkdoc opt">,</span> 
+        <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-GDateTime.html#g-date-time-to-unix">g_date_time_to_unix</a></span><span class="gtkdoc opt">(</span>now<span class="gtkdoc opt">));</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-GDateTime.html#g-date-time-unref">g_date_time_unref</a></span><span class="gtkdoc opt">(</span>now<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-int64">gsignond_dictionary_set_int64</a></span><span class="gtkdoc opt">(</span>token<span class="gtkdoc opt">,</span> <span class="string">&quot;Duration&quot;</span><span class="gtkdoc opt">,</span> <span class="number">3600</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>token<span class="gtkdoc opt">,</span> <span class="string">&quot;RefreshToken&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;megarefreshtoken&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>token<span class="gtkdoc opt">,</span> <span class="string">&quot;Scope&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;somescope1 somescope2 somescope3&quot;</span><span class="gtkdoc opt">);</span>
+    GVariant<span class="gtkdoc opt">*</span> token_var <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-to-variant">gsignond_dictionary_to_variant</a></span><span class="gtkdoc opt">(</span>token<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-unref">gsignond_dictionary_unref</a></span><span class="gtkdoc opt">(</span>token<span class="gtkdoc opt">);</span>
+    <span class="keyword">return</span> token_var<span class="gtkdoc opt">;</span>
+<span class="gtkdoc opt">}</span>
+
+<span class="gtkdoc slc">//this function makes a token cache with one unrelated token</span>
+<span class="gtkdoc slc">//(because it belongs to a different client id)</span>
+<span class="gtkdoc kwb">static</span> GSignondDictionary<span class="gtkdoc opt">*</span> <span class="function">make_token_cache</span><span class="gtkdoc opt">()</span>
+<span class="gtkdoc opt">{</span>
+    GSignondDictionary<span class="gtkdoc opt">*</span> tokens <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-new">gsignond_dictionary_new</a></span><span class="gtkdoc opt">();</span>
+    GSignondDictionary<span class="gtkdoc opt">*</span> client_tokens <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-new">gsignond_dictionary_new</a></span><span class="gtkdoc opt">();</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set">gsignond_dictionary_set</a></span><span class="gtkdoc opt">(</span>client_tokens<span class="gtkdoc opt">,</span> <span class="string">&quot;somescope1 somescope2 somescope3&quot;</span><span class="gtkdoc opt">,</span> <span class="function">make_normal_token</span><span class="gtkdoc opt">());</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set">gsignond_dictionary_set</a></span><span class="gtkdoc opt">(</span>tokens<span class="gtkdoc opt">,</span> <span class="string">&quot;someotherclient&quot;</span><span class="gtkdoc opt">,</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-to-variant">gsignond_dictionary_to_variant</a></span><span class="gtkdoc opt">(</span>client_tokens<span class="gtkdoc opt">));</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-unref">gsignond_dictionary_unref</a></span><span class="gtkdoc opt">(</span>client_tokens<span class="gtkdoc opt">);</span>
+    <span class="keyword">return</span> tokens<span class="gtkdoc opt">;</span>
+<span class="gtkdoc opt">}</span>
+
+<span class="gtkdoc slc">//this callback prints the received token and exits the mainloop</span>
+<span class="gtkdoc kwb">static void</span> <span class="function">response_callback</span><span class="gtkdoc opt">(</span>GSignondPlugin<span class="gtkdoc opt">*</span> plugin<span class="gtkdoc opt">,</span> GSignondSessionData<span class="gtkdoc opt">*</span> result<span class="gtkdoc opt">,</span>
+                     gpointer user_data<span class="gtkdoc opt">)</span>
+<span class="gtkdoc opt">{</span>
+    GVariant<span class="gtkdoc opt">*</span> token_variant <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-to-variant">gsignond_dictionary_to_variant</a></span><span class="gtkdoc opt">(</span>result<span class="gtkdoc opt">);</span>
+    gchar<span class="gtkdoc opt">*</span> token_str <span class="gtkdoc opt">=</span> <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-GVariant.html#g-variant-print">g_variant_print</a></span><span class="gtkdoc opt">(</span>token_variant<span class="gtkdoc opt">,</span> TRUE<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Warnings-and-Assertions.html#g-print">g_print</a></span><span class="gtkdoc opt">(</span><span class="string">&quot;Authenticated successfully, got token:</span><span class="gtkdoc esc">\n</span><span class="string">%s</span><span class="gtkdoc esc">\n</span><span class="string">&quot;</span><span class="gtkdoc opt">,</span>
+             token_str<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Memory-Allocation.html#g-free">g_free</a></span><span class="gtkdoc opt">(</span>token_str<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-GVariant.html#g-variant-unref">g_variant_unref</a></span><span class="gtkdoc opt">(</span>token_variant<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#g-main-loop-quit">g_main_loop_quit</a></span><span class="gtkdoc opt">(</span>user_data<span class="gtkdoc opt">);</span>    
+<span class="gtkdoc opt">}</span>
+
+<span class="gtkdoc slc">//this function prints the content of the updated token cache</span>
+<span class="gtkdoc kwb">static void</span> <span class="function">store_callback</span><span class="gtkdoc opt">(</span>GSignondPlugin<span class="gtkdoc opt">*</span> plugin<span class="gtkdoc opt">,</span> GSignondSessionData<span class="gtkdoc opt">*</span> result<span class="gtkdoc opt">,</span>
+                     gpointer user_data<span class="gtkdoc opt">)</span>
+<span class="gtkdoc opt">{</span>
+    GVariant<span class="gtkdoc opt">*</span> token_variant <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-to-variant">gsignond_dictionary_to_variant</a></span><span class="gtkdoc opt">(</span>result<span class="gtkdoc opt">);</span>
+    gchar<span class="gtkdoc opt">*</span> token_str <span class="gtkdoc opt">=</span> <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-GVariant.html#g-variant-print">g_variant_print</a></span><span class="gtkdoc opt">(</span>token_variant<span class="gtkdoc opt">,</span> TRUE<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Warnings-and-Assertions.html#g-print">g_print</a></span><span class="gtkdoc opt">(</span><span class="string">&quot;Should replace the token cache with the following:</span><span class="gtkdoc esc">\n</span><span class="string">%s</span><span class="gtkdoc esc">\n</span><span class="string">&quot;</span><span class="gtkdoc opt">,</span>
+             token_str<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Memory-Allocation.html#g-free">g_free</a></span><span class="gtkdoc opt">(</span>token_str<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-GVariant.html#g-variant-unref">g_variant_unref</a></span><span class="gtkdoc opt">(</span>token_variant<span class="gtkdoc opt">);</span>
+<span class="gtkdoc opt">}</span>
+
+<span class="gtkdoc slc">//this function shows what the UI interaction component needs to do</span>
+<span class="gtkdoc kwb">static void</span> <span class="function">user_action_required_callback</span><span class="gtkdoc opt">(</span>GSignondPlugin<span class="gtkdoc opt">*</span> plugin<span class="gtkdoc opt">,</span> 
+                                          GSignondSignonuiData<span class="gtkdoc opt">*</span> ui_request<span class="gtkdoc opt">,</span> 
+                                          gpointer user_data<span class="gtkdoc opt">)</span>
+<span class="gtkdoc opt">{</span>
+    <span class="gtkdoc slc">// ui_request typically contains a URI that needs to be opened, </span>
+    <span class="gtkdoc slc">// and a redirect URI that needs to be 'captured' by the user-agent and </span>
+    <span class="gtkdoc slc">// reported back to the plugin</span>
+    <span class="gtkdoc slc">// in practice the ui_request needs to be handed over to a user-agent</span>
+    <span class="gtkdoc slc">// but here we simply print it</span>
+    GVariant<span class="gtkdoc opt">*</span> token_variant <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-to-variant">gsignond_dictionary_to_variant</a></span><span class="gtkdoc opt">(</span>ui_request<span class="gtkdoc opt">);</span>
+    gchar<span class="gtkdoc opt">*</span> token_str <span class="gtkdoc opt">=</span> <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-GVariant.html#g-variant-print">g_variant_print</a></span><span class="gtkdoc opt">(</span>token_variant<span class="gtkdoc opt">,</span> TRUE<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Warnings-and-Assertions.html#g-print">g_print</a></span><span class="gtkdoc opt">(</span><span class="string">&quot;Got a UI interaction request:</span><span class="gtkdoc esc">\n</span><span class="string">%s</span><span class="gtkdoc esc">\n</span><span class="string">&quot;</span><span class="gtkdoc opt">,</span>
+             token_str<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Memory-Allocation.html#g-free">g_free</a></span><span class="gtkdoc opt">(</span>token_str<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-GVariant.html#g-variant-unref">g_variant_unref</a></span><span class="gtkdoc opt">(</span>token_variant<span class="gtkdoc opt">);</span>
+    
+    <span class="gtkdoc slc">// in practice the following should be received from a user-agent,</span>
+    <span class="gtkdoc slc">// but in this example for the sake of simplicity we report the hardcoded redirect</span>
+    <span class="gtkdoc slc">// URI (with additional parameters) immidiately back to the plugin</span>
+    GSignondSignonuiData<span class="gtkdoc opt">*</span> ui_data <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-new">gsignond_dictionary_new</a></span><span class="gtkdoc opt">();</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondSignonuiData.html#gsignond-signonui-data-set-url-response">gsignond_signonui_data_set_url_response</a></span><span class="gtkdoc opt">(</span>ui_data<span class="gtkdoc opt">,</span> 
+<span class="string">&quot;http://somehost/login.html?state=somerandomstate&amp;code=somerandomcode&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondSignonuiData.html#gsignond-signonui-data-set-query-error">gsignond_signonui_data_set_query_error</a></span><span class="gtkdoc opt">(</span>ui_data<span class="gtkdoc opt">,</span> SIGNONUI_ERROR_NONE<span class="gtkdoc opt">);</span>
+
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-user-action-finished">gsignond_plugin_user_action_finished</a></span><span class="gtkdoc opt">(</span>plugin<span class="gtkdoc opt">,</span> ui_data<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-unref">gsignond_dictionary_unref</a></span><span class="gtkdoc opt">(</span>ui_data<span class="gtkdoc opt">);</span>
+<span class="gtkdoc opt">}</span>
+
+<span class="gtkdoc slc">// print an error and exit the mainloop</span>
+<span class="gtkdoc kwb">static void</span> <span class="function">error_callback</span><span class="gtkdoc opt">(</span>GSignondPlugin<span class="gtkdoc opt">*</span> plugin<span class="gtkdoc opt">,</span> GError<span class="gtkdoc opt">*</span> error<span class="gtkdoc opt">,</span>
+                     gpointer user_data<span class="gtkdoc opt">)</span>
+<span class="gtkdoc opt">{</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Warnings-and-Assertions.html#g-print">g_print</a></span><span class="gtkdoc opt">(</span><span class="string">&quot;Got an error: %s</span><span class="gtkdoc esc">\n</span><span class="string">&quot;</span><span class="gtkdoc opt">,</span> error<span class="gtkdoc opt">-&gt;</span>message<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#g-main-loop-quit">g_main_loop_quit</a></span><span class="gtkdoc opt">(</span>user_data<span class="gtkdoc opt">);</span>
+<span class="gtkdoc opt">}</span>
+
+<span class="gtkdoc kwb">int</span> <span class="function">main</span> <span class="gtkdoc opt">(</span><span class="gtkdoc kwb">void</span><span class="gtkdoc opt">)</span>
+<span class="gtkdoc opt">{</span>
+<span class="gtkdoc ppc">#if !GLIB_CHECK_VERSION (2, 36, 0)</span>
+    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Type-Information.html#g-type-init">g_type_init</a></span> <span class="gtkdoc opt">();</span>
+<span class="gtkdoc ppc">#endif</span>
+
+    gpointer plugin <span class="gtkdoc opt">=</span> <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#g-object-new">g_object_new</a></span><span class="gtkdoc opt">(</span><span class="function">gsignond_oauth_plugin_get_type</span><span class="gtkdoc opt">(),</span> NULL<span class="gtkdoc opt">);</span>
+
+    GMainLoop <span class="gtkdoc opt">*</span>main_loop <span class="gtkdoc opt">=</span> <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#g-main-loop-new">g_main_loop_new</a></span> <span class="gtkdoc opt">(</span>NULL<span class="gtkdoc opt">,</span> FALSE<span class="gtkdoc opt">);</span>    
+
+    <span class="gtkdoc slc">//connect to various signals of the plugin object</span>
+    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Signals.html#g-signal-connect">g_signal_connect</a></span><span class="gtkdoc opt">(</span>plugin<span class="gtkdoc opt">,</span> <span class="string">&quot;response-final&quot;</span><span class="gtkdoc opt">,</span> <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Closures.html#G-CALLBACK:CAPS">G_CALLBACK</a></span><span class="gtkdoc opt">(</span>response_callback<span class="gtkdoc opt">),</span> main_loop<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Signals.html#g-signal-connect">g_signal_connect</a></span><span class="gtkdoc opt">(</span>plugin<span class="gtkdoc opt">,</span> <span class="string">&quot;user-action-required&quot;</span><span class="gtkdoc opt">,</span> 
+                     <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Closures.html#G-CALLBACK:CAPS">G_CALLBACK</a></span><span class="gtkdoc opt">(</span>user_action_required_callback<span class="gtkdoc opt">),</span> NULL<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Signals.html#g-signal-connect">g_signal_connect</a></span><span class="gtkdoc opt">(</span>plugin<span class="gtkdoc opt">,</span> <span class="string">&quot;store&quot;</span><span class="gtkdoc opt">,</span> <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Closures.html#G-CALLBACK:CAPS">G_CALLBACK</a></span><span class="gtkdoc opt">(</span>store_callback<span class="gtkdoc opt">),</span> NULL<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Signals.html#g-signal-connect">g_signal_connect</a></span><span class="gtkdoc opt">(</span>plugin<span class="gtkdoc opt">,</span> <span class="string">&quot;error&quot;</span><span class="gtkdoc opt">,</span> <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-Closures.html#G-CALLBACK:CAPS">G_CALLBACK</a></span><span class="gtkdoc opt">(</span>error_callback<span class="gtkdoc opt">),</span> main_loop<span class="gtkdoc opt">);</span>
+
+    GSignondSessionData<span class="gtkdoc opt">*</span> data <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-new">gsignond_dictionary_new</a></span><span class="gtkdoc opt">();</span>
+    GSignondDictionary<span class="gtkdoc opt">*</span> token_cache <span class="gtkdoc opt">=</span> <span class="function">make_token_cache</span><span class="gtkdoc opt">();</span>
+
+    <span class="gtkdoc slc">//fill in necessary data for OAuth2 authorization</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> <span class="string">&quot;ClientId&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;megaclient&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondSessionData.html#gsignond-session-data-set-ui-policy">gsignond_session_data_set_ui_policy</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> GSIGNOND_UI_POLICY_DEFAULT<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> <span class="string">&quot;TokenHost&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;somehost&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> <span class="string">&quot;TokenPath&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;/tokenpath&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> <span class="string">&quot;Scope&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;Photos Videos&quot;</span><span class="gtkdoc opt">);</span>
+    
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> <span class="string">&quot;AuthHost&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;somehost&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> <span class="string">&quot;AuthPath&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;/somepath&quot;</span><span class="gtkdoc opt">);</span>
+    
+    <span class="gtkdoc kwb">const</span> gchar <span class="gtkdoc opt">*</span>realm_list<span class="gtkdoc opt">[] = {</span> <span class="string">&quot;somehost&quot;</span><span class="gtkdoc opt">,</span> NULL <span class="gtkdoc opt">};</span>
+    GSequence <span class="gtkdoc opt">*</span>allowed_realms <span class="gtkdoc opt">=</span> <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-Utility-functions.html#gsignond-copy-array-to-sequence">gsignond_copy_array_to_sequence</a></span><span class="gtkdoc opt">(</span>realm_list<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondSessionData.html#gsignond-session-data-set-allowed-realms">gsignond_session_data_set_allowed_realms</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> allowed_realms<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-Sequences.html#g-sequence-free">g_sequence_free</a></span><span class="gtkdoc opt">(</span>allowed_realms<span class="gtkdoc opt">);</span>
+    
+    <span class="gtkdoc slc">//use authorization code grant for this example as it's the most complex</span>
+    <span class="gtkdoc slc">//of those provided in OAuth2 spec</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> <span class="string">&quot;ResponseType&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;code&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-set-string">gsignond_dictionary_set_string</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">,</span> <span class="string">&quot;RedirectUri&quot;</span><span class="gtkdoc opt">,</span> <span class="string">&quot;http://somehost/login.html&quot;</span><span class="gtkdoc opt">);</span>
+
+    <span class="gtkdoc slc">//start the authorization and run the mainloop</span>
+    <span class="gtkdoc slc">//any further processing happens in signal callbacks</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial">gsignond_plugin_request_initial</a></span><span class="gtkdoc opt">(</span>plugin<span class="gtkdoc opt">,</span> data<span class="gtkdoc opt">,</span> token_cache<span class="gtkdoc opt">,</span> <span class="string">&quot;oauth2&quot;</span><span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-unref">gsignond_dictionary_unref</a></span><span class="gtkdoc opt">(</span>data<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondDictionary.html#gsignond-dictionary-unref">gsignond_dictionary_unref</a></span><span class="gtkdoc opt">(</span>token_cache<span class="gtkdoc opt">);</span>
+    
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#g-main-loop-run">g_main_loop_run</a></span> <span class="gtkdoc opt">(</span>main_loop<span class="gtkdoc opt">);</span>
+    
+    <span class="function"><a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#g-object-unref">g_object_unref</a></span><span class="gtkdoc opt">(</span>plugin<span class="gtkdoc opt">);</span>
+    <span class="function"><a href="http://library.gnome.org/devel/glib/unstable/glib-The-Main-Event-Loop.html#g-main-loop-unref">g_main_loop_unref</a></span><span class="gtkdoc opt">(</span>main_loop<span class="gtkdoc opt">);</span>
+    
+    <span class="keyword">return</span> <span class="number">0</span><span class="gtkdoc opt">;</span>
+<span class="gtkdoc opt">}</span></pre></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+</div>
+<br class="example-break"><div class="refsect1">
+<a name="id-1.2.2.6.15"></a><h2>HTTP-related parameters in requests</h2>
+</div>
+<p>Both OAuth1 and OAuth2 are using HTTP requests for authorization. It's possible
+to use the following entries in <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial"><code class="function">gsignond_plugin_request_initial()</code></a> <em class="parameter"><code>session_data</code></em>
+
+parameter to influence those requests:</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>gsignond_session_data_set_network_proxy() provides a HTTP proxy to use.
+If this parameter is not set, the system proxy configuration is used.</p></li>
+<li class="listitem"><p>"SslStrict" key whose value is a gboolean. If set to FALSE, then server
+certificates which are invalid (for example, expired, or self-signed) 
+will not be rejected. If set to TRUE or not set, then server certificates
+have to be valid.</p></li>
+</ul></div>
+<div class="refsect1">
+<a name="id-1.2.2.6.18"></a><h2>OAuth version 1 parameters for authorization</h2>
+</div>
+<p>Where not specified otherwise, parameters are strings.</p>
+<div class="refsect2">
+<a name="id-1.2.2.6.20"></a><h3>Parameters in <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial"><code class="function">gsignond_plugin_request_initial()</code></a> <em class="parameter"><code>identity_method_cache</code></em>
+</h3>
+</div>
+<p>This parameter contains a cache of previously received tokens in the form of
+a <span class="type">GSignondDictionary</span>. Tokens are indexed by a ConsumerKey in the dictionary,
+and each token is itself a <span class="type">GSignondDictionary</span>, with keys and values described
+below in the token format section.</p>
+<hr>
+<div class="refsect2">
+<a name="id-1.2.2.6.22"></a><h3>Parameters in <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial"><code class="function">gsignond_plugin_request_initial()</code></a> <em class="parameter"><code>session_data</code></em>
+</h3>
+</div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>"ConsumerKey" (mandatory) - the identifier portion of the client 
+credentials (equivalent to a username). Refer to <a class="ulink" href="http://tools.ietf.org/html/rfc5849#section-3.1" target="_top">RFC5849 section 3.1</a></p></li>
+<li class="listitem"><p>gsignond_session_data_set_ui_policy() (mandatory) - if set to <code class="literal">GSIGNOND_UI_POLICY_DEFAULT</code>
+a default authorization sequence is used, which may involve re-using a
+previously cached token without making any authorization server requests at all.
+If set to <code class="literal">GSIGNOND_UI_POLICY_REQUEST_PASSWORD</code> any cached token corresponding
+to the ConsumerKey is discarded and the authorization procedure is started
+from the beginning.</p></li>
+<li class="listitem"><p>gsignond_session_data_set_allowed_realms (mandatory) - a list of domains that
+RequestEndpoint, AuthorizationEndpoint and TokenEndpoint hosts must be in. There
+authorization sequence will fail if any of the endpoints is not in this list.</p></li>
+<li class="listitem">
+<p>"Realm" (optional) - a requested realm for the token, as specified in</p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc5849#section-3.5.1" target="_top">RFC5849 section 3.5.1.</a>
+</li>
+<li class="listitem">
+<p>"RequestEndpoint" (mandatory) - a URL that specifies an endpoint used by 
+the plugin to obtain a set of temporary credentials, as specified in </p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc5849#section-2" target="_top">RFC5849 section 2.</a><p>The endpoint must use HTTPS scheme.</p>
+</li>
+<li class="listitem">
+<p>"Callback" (mandatory) - a callback URI where the user is redirected after
+completing the Resource Owner Authorization step, as specified in </p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc5849#section-2" target="_top">RFC5849 section 2.</a>
+</li>
+<li class="listitem"><p>"SignatureMethod" (mandatory) - one of "PLAINTEXT", "HMAC-SHA1", or 
+"RSA-SHA1" - a method used used by the plugin to sign the requests. 
+Specified in <a class="ulink" href="http://tools.ietf.org/html/rfc5849#section-3.4" target="_top">RFC5849 section 3.4.</a></p></li>
+<li class="listitem"><p>"ConsumerSecret" (optional) - the shared secret portion of the client
+credentials, used to sign requests to the server when using PLAINTEXT or
+HMAC-SHA1 signature methods. An empty consumer secret is used if it's not supplied.</p></li>
+<li class="listitem"><p>"RSAPrivateKey" (mandatory, if RSA-SHA1 signature method is used) - PEM
+formatted X.509 private key, used to sign requests to the server when using
+RSA-SHA1 signature methods.</p></li>
+<li class="listitem">
+<p>"AuthorizationEndpoint" (mandatory) - Resource Owner Authorization endpoint,
+to which the user (resource owner) is redirected to grant authorization, as specified in </p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc5849#section-2" target="_top">RFC5849 section 2.</a>
+</li>
+<li class="listitem"><p>gsignond_session_data_set_username() and <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondSessionData.html#gsignond-session-data-set-secret"><code class="function">gsignond_session_data_set_secret()</code></a> 
+(optional) - these two parameters may be used when opening the authorization 
+endpoint URI to initialize corresponding  fields on the webpage.</p></li>
+<li class="listitem">
+<p>"TokenEndpoint" (mandatory) - a URL that specifies an endpoint used by 
+the plugin to obtain a set of access credentials, as specified in </p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc5849#section-2" target="_top">RFC5849 section 2.</a>
+</li>
+</ul></div>
+<hr>
+<div class="refsect2">
+<a name="id-1.2.2.6.24"></a><h3>Parameters for <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#GSignondPlugin-user-action-required"><span class="type">“user-action-required”</span></a> signal issued by plugin</h3>
+</div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>gsignond_signonui_data_set_open_url() (mandatory) - a URI that should be opened in a 
+user-agent (browser) for the user (resource owner) to authenticate herself. 
+This URI is taken from "AuthorizationEndpoint" parameter of <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial"><code class="function">gsignond_plugin_request_initial()</code></a>
+and additional parameters may be appended to the query component.</p></li>
+<li class="listitem"><p>gsignond_signonui_data_set_final_url() (mandatory) - a URI where the user-agent should 
+be redirected after a successfull authentication by the resource owner. This
+expected URI is taken from the "Callback" parameter of <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial"><code class="function">gsignond_plugin_request_initial()</code></a> call
+to the plugin.The actual (vs. expected) URI may contain additional parameters in the query 
+component of the URI that are used to continue the authorization process.</p></li>
+<li class="listitem"><p>gsignond_signonui_data_set_username() and <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondSignonuiData.html#gsignond-signonui-data-set-password"><code class="function">gsignond_signonui_data_set_password()</code></a> 
+(optional) - these two parameters may be used when opening the URI to initialize 
+corresponding fields on the webpage.</p></li>
+</ul></div>
+<hr>
+<div class="refsect2">
+<a name="id-1.2.2.6.26"></a><h3>Parameters in <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-user-action-finished"><code class="function">gsignond_plugin_user_action_finished()</code></a> <em class="parameter"><code>ui_data</code></em> </h3>
+</div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>gsignond_signonui_data_set_query_error() (mandatory) - indicates if there
+was an error in UI interaction and what it was. May be <code class="literal">SIGNONUI_ERROR_NONE</code>
+(which means no error), <code class="literal">SIGNONUI_ERROR_CANCELED</code> or any other error.</p></li>
+<li class="listitem"><p>gsignond_signonui_data_get_url_response() (mandatory) - the URI that the user-agent
+was redirected to. The callback URI supplied in parameters of
+<a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial"><code class="function">gsignond_plugin_request_initial()</code></a> must be a prefix of this URI. The URI also
+has to contain parameters in the query component that are necessary to continue
+the authorization sequence.</p></li>
+</ul></div>
+<hr>
+<div class="refsect2">
+<a name="id-1.2.2.6.28"></a><h3>Token and its parameters in <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#GSignondPlugin-response-final"><span class="type">“response-final”</span></a> signal</h3>
+</div>
+<p>gsignond_plugin_response_final() signal concludes the authorization process
+and returns a <span class="type">GSignondDictionary</span> parameter that contains the access token
+and some token parameters:</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>"AccessToken" (mandatory) - the token itself</p></li>
+<li class="listitem"><p>"TokenSecret" (mandatory) - the token shared-secret, used by the application
+to sign requests for protected resources</p></li>
+<li class="listitem">
+<p>"Realm" (optional) - the token realm, as specified in</p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc5849#section-3.5.1" target="_top">RFC5849 section 3.5.1.</a>
+</li>
+<li class="listitem"><p>"TokenParameters" (mandatory) - a <span class="type">GSignondDictionary</span> containing any
+additional parameters returned by the server together with the access token. 
+This dictionary may be empty, or
+if it's not, it typically contains service-specific, non-standardized keys and
+values.</p></li>
+</ul></div>
+<div class="refsect1">
+<a name="id-1.2.2.6.31"></a><h2>OAuth version 2 parameters for authorization</h2>
+</div>
+<p>Where not specified otherwise, parameters are strings.</p>
+<hr>
+<div class="refsect2">
+<a name="id-1.2.2.6.33"></a><h3>Parameters in <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial"><code class="function">gsignond_plugin_request_initial()</code></a> <em class="parameter"><code>identity_method_cache</code></em>
+</h3>
+</div>
+<p>This parameter contains a cache of previously received tokens in the form of
+a <span class="type">GSignondDictionary</span>. The keys are tokens' ClientId and values are also
+<span class="type">GSignondDictionary</span>. Those second-level dictionaries contain token scopes as keys
+and tokens as values. This two-level approach is done to allow caching several
+tokens with unrelated scopes per client.</p>
+<p>Finally, each token is itself a <span class="type">GSignondDictionary</span>, with keys and values described
+below in the token format section.</p>
+<hr>
+<div class="refsect2">
+<a name="id-1.2.2.6.36"></a><h3>Parameters in <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial"><code class="function">gsignond_plugin_request_initial()</code></a> <em class="parameter"><code>session_data</code></em>
+</h3>
+</div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>"ClientId" (mandatory) - client identifier as described in </p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-2.2" target="_top">RFC6749 section 2.2.</a>
+</li>
+<li class="listitem">
+<p>"ClientSecret" (optional) - client password as described in</p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-2.3" target="_top">RFC6749 section 2.3.</a>
+</li>
+<li class="listitem"><p>gsignond_session_data_set_ui_policy() (mandatory) - if set to <code class="literal">GSIGNOND_UI_POLICY_DEFAULT</code>
+a default authorization sequence is used, which may involve re-using a
+previously cached token without making any authorization server requests at all.
+If set to <code class="literal">GSIGNOND_UI_POLICY_REQUEST_PASSWORD</code> any cached token information 
+(including a refresh token) corresponding to the ClientId is discarded and 
+the authorization procedure is started from the beginning.</p></li>
+<li class="listitem"><p>gsignond_session_data_set_allowed_realms (mandatory) - a list of domains that
+AuthHost and TokenHost must be in. The authorization sequence will fail if 
+either of the hosts is not in this list.</p></li>
+<li class="listitem">
+<p>"Scope" (optional) - a space-separated list of scopes that are requested 
+for the token, as specified in </p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-3.3" target="_top">RFC6749 section 3.3.</a>
+</li>
+<li class="listitem">
+<p>"ForceClientAuthViaRequestBody" (optional) - by default the clients are authenticated via
+HTTP Basic authorization mechanism, as described in </p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-2.3.1" target="_top">RFC6749 section 2.3.1.</a><p>The RFC stipulates that all OAuth 2 servers must support this, however, it 
+was discovered that at least Google and Facebook require
+client authorization in the request body (which is, according to standard,
+optional and not recommended). If set to TRUE, this parameter forces this
+non-compliant client authorization to be used.</p>
+</li>
+<li class="listitem"><p>"ForceTokenRefresh" (optional) - normally if the token cache contains a
+suitable token, it is returned immediately. If this parameter is set to TRUE,
+then a refresh token is always used instead to obtain a new token.</p></li>
+</ul></div>
+<div class="refsect3">
+<a name="id-1.2.2.6.38"></a><h4>Parameters used for authorization code grant or implicit grant flows</h4>
+</div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>"ResponseType" (mandatory) - should be set to "code" or "token" as described in </p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-3.1.1" target="_top">RFC6749 section 3.1.1.</a>
+</li>
+<li class="listitem">
+<p>"AuthHost" (mandatory) - hostname component of the authorization endpoint URI, as described in</p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-3.1" target="_top">RFC6749 section 3.1.</a>
+</li>
+<li class="listitem">
+<p>"AuthPath" (mandatory) - pathname component of the authorization endpoint URI, as described in</p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-3.1" target="_top">RFC6749 section 3.1.</a>
+</li>
+<li class="listitem">
+<p>"AuthPort" (optional) - port component of the authorization endpoint URI, as described in</p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-3.1" target="_top">RFC6749 section 3.1.</a><p>If not specified, standard https port is used.</p>
+</li>
+<li class="listitem">
+<p>"AuthQuery" (optional) - query component of the authorization endpoint URI, as described in</p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-3.1" target="_top">RFC6749 section 3.1.</a>
+</li>
+<li class="listitem">
+<p>"RedirectUri" (optional) - redirection endpoint as described in</p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-3.1.2" target="_top">RFC6749 section 3.1.2.</a>
+</li>
+<li class="listitem"><p>gsignond_session_data_set_username() and <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondSessionData.html#gsignond-session-data-set-secret"><code class="function">gsignond_session_data_set_secret()</code></a> 
+(optional) - these two parameters may be used by UI implementation to 
+initialize corresponding  fields on the webpage when opening the authorization 
+endpoint URI. Also see "UseLoginHint".</p></li>
+<li class="listitem">
+<p>"UseLoginHint" (optional) - if set to TRUE, add the username (see above) to 
+the authorization URI as a "login_hint" parameter, so that the authorization 
+endpoint can pre-fill the login box, or selecte the proper multi-login session. 
+This is a Google extension specified at </p>
+<a class="ulink" href="https://developers.google.com/accounts/docs/OAuth2InstalledApp#formingtheurl" target="_top">
+https://developers.google.com/accounts/docs/OAuth2InstalledApp#formingtheurl</a>.
+</li>
+<li class="listitem">
+<p>"UseDisplay" (optional) - if set to a string, the parameter value is added to the authorization
+URI as a "display" parameter. This is a Facebook extension specified at</p>
+<a class="ulink" href="https://developers.facebook.com/docs/reference/dialogs/oauth/" target="_top">
+https://developers.facebook.com/docs/reference/dialogs/oauth/</a><p>and it affects the way the authorization page looks. Typical values are "page",
+"popup" and "touch".</p>
+</li>
+</ul></div>
+<div class="refsect3">
+<a name="id-1.2.2.6.40"></a><h4>Parameters used for resource owner password credentials grant flow</h4>
+</div>
+<p>Refer to <a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-4.3" target="_top">RFC6749 section 4.3.</a></p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>"GrantType" (mandatory) - must be set to "password"</p></li>
+<li class="listitem"><p>gsignond_session_data_set_username() and <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondSessionData.html#gsignond-session-data-set-secret"><code class="function">gsignond_session_data_set_secret()</code></a> 
+(mandatory) - resource owner username and password</p></li>
+</ul></div>
+<div class="refsect3">
+<a name="id-1.2.2.6.43"></a><h4>Parameters used for client credentials grant flow</h4>
+</div>
+<p>Refer to <a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-4.4" target="_top">RFC6749 section 4.4.</a></p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>"GrantType" (mandatory) - must be set to "client_credentials"</p></li></ul></div>
+<div class="refsect3">
+<a name="id-1.2.2.6.46"></a><h4>Parameters used for authorization code, resource owner 
+password or client credentials grant flows (but not implicit grant flow) </h4>
+</div>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+<p>"TokenHost" (mandatory) - hostname component of the token endpoint URI, as described in</p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-3.2" target="_top">RFC6749 section 3.2.</a>
+</li>
+<li class="listitem">
+<p>"TokenPath" (mandatory) - pathname component of the token endpoint URI, as described in</p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-3.2" target="_top">RFC6749 section 3.2.</a>
+</li>
+<li class="listitem">
+<p>"TokenPort" (optional) - port component of the token endpoint URI, as described in</p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-3.2" target="_top">RFC6749 section 3.2.</a><p>If not specified, standard https port is used.</p>
+</li>
+<li class="listitem">
+<p>"TokenQuery" (optional) - query component of the token endpoint URI, as described in</p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-3.2" target="_top">RFC6749 section 3.2.</a>
+</li>
+</ul></div>
+<hr>
+<div class="refsect2">
+<a name="id-1.2.2.6.48"></a><h3>Parameters for <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#GSignondPlugin-user-action-required"><span class="type">“user-action-required”</span></a> signal issued by plugin</h3>
+</div>
+<p>This signal is issued only when using authorization code grant or implicit code grant flows,
+and contains the following parameters:</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>gsignond_signonui_data_set_open_url() (mandatory) - an authorization endpoint URI that should be opened in a 
+user-agent (browser) for the user (resource owner) to authenticate herself. 
+This URI is constructed using parameters of <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial"><code class="function">gsignond_plugin_request_initial()</code></a>
+and additional parameters may be appended to the query component.</p></li>
+<li class="listitem"><p>gsignond_signonui_data_set_final_url() (optional) - a redirection endpoint URI where the user-agent should 
+be redirected after authentication by the resource owner has finished. This
+expected URI is taken from the "RedirectUri" parameter of <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial"><code class="function">gsignond_plugin_request_initial()</code></a> call
+to the plugin. The actual (vs. expected) URI may contain additional parameters in the query or fragment
+components of the URI that are used to determine the outcome of the authorization process.</p></li>
+<li class="listitem"><p>gsignond_signonui_data_set_username() and <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-GSignondSignonuiData.html#gsignond-signonui-data-set-password"><code class="function">gsignond_signonui_data_set_password()</code></a> 
+(optional) - these two parameters may be used when opening the authorization endpoint URI to initialize 
+corresponding fields on the webpage.</p></li>
+</ul></div>
+<hr>
+<div class="refsect2">
+<a name="id-1.2.2.6.51"></a><h3>Parameters in <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-user-action-finished"><code class="function">gsignond_plugin_user_action_finished()</code></a> <em class="parameter"><code>ui_data</code></em> </h3>
+</div>
+<p>This function is called when UI interaction has completed and only when using
+authorization code grant or implicit code grant flows.</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>gsignond_signonui_data_set_query_error() (mandatory) - indicates if there
+was an error in UI interaction and what it was. May be <code class="literal">SIGNONUI_ERROR_NONE</code>
+(which means no error), <code class="literal">SIGNONUI_ERROR_CANCELED</code> or any other error.</p></li>
+<li class="listitem">
+<p>gsignond_signonui_data_get_url_response() (mandatory) - the URI that the user-agent
+was redirected to. The redirection endpoint URI supplied in parameters of
+<a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial"><code class="function">gsignond_plugin_request_initial()</code></a> must be a prefix of this URI. The URI also
+has to contain parameters in the query component (if using authorization code grant) 
+or in the fragment component (if using implicit code grant) that are necessary to continue
+the authorization sequence. Specific information is provided at </p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-4.1.2" target="_top">RFC6749 section 4.1.2</a><p>and <a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-4.2.2" target="_top">RFC6749 section 4.2.2</a>
+respectively.</p>
+</li>
+</ul></div>
+<hr>
+<div class="refsect2">
+<a name="id-1.2.2.6.54"></a><h3>Token and its parameters in <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#GSignondPlugin-response-final"><span class="type">“response-final”</span></a> signal</h3>
+</div>
+<p>gsignond_plugin_response_final() signal concludes the authorization process
+and returns a <span class="type">GSignondDictionary</span> parameter that contains the access token
+and some token parameters:</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem"><p>"AccessToken" (mandatory) - the token itself</p></li>
+<li class="listitem">
+<p>"TokenType" (mandatory) - the token type, as specified in</p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-7.1" target="_top">RFC6749 section 7.1</a>.
+<p>Currently only one token type is supported (the bearer token, standardizied in</p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6750" target="_top">RFC6750</a>).
+</li>
+<li class="listitem"><p>"TokenParameters" (mandatory) - a <span class="type">GSignondDictionary</span> containing any
+additional parameters returned by the server together with the access token. 
+The contents of this parameter is specific to the token type, and for bearer
+tokens it's empty.</p></li>
+<li class="listitem">
+<p>"Scope" (optional) - the scopes of the issued token, a space separated list
+as specified in </p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-3.3" target="_top">RFC6749 section 3.3.</a>
+</li>
+<li class="listitem"><p>"Timestamp" (mandatory) - a gint64 Unix time specifying the time when token was issued.
+A Unix time is the number of seconds that have elapsed since 1970-01-01 00:00:00 UTC.</p></li>
+<li class="listitem"><p>"Duration" (optional) - the lifetime in seconds of the access token. If specified, the token
+will expire at Timestamp+Duration point in time.</p></li>
+<li class="listitem">
+<p>"RefreshToken" (optional) - refresh token as specified in</p>
+<a class="ulink" href="http://tools.ietf.org/html/rfc6749#section-6" target="_top">RFC6749 section 6.</a>
+</li>
+</ul></div>
+<div class="refsect1">
+<a name="id-1.2.2.6.57"></a><h2>Plugin API common to OAuth1 and Oauth2</h2>
+</div>
+<hr>
+<div class="refsect2">
+<a name="id-1.2.2.6.58"></a><h3>Parameters of <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#GSignondPlugin-store"><span class="type">“store”</span></a> signal</h3>
+</div>
+<p>This signal is issued by the plugin when the token cache needs to be updated.
+The parameter is a <span class="type">GSignondDictionary</span> of tokens. The specific cache format 
+is same as <em class="parameter"><code>identity_method_cache</code></em>
+ parameter of <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial"><code class="function">gsignond_plugin_request_initial()</code></a>
+and is desribed in detail in corresponding OAuth1 and OAuth2 sections.</p>
+<p>The token cache should be entirely replaced with the parameter of the signal;
+the plugin preserves existing tokens that were supplied to 
+<a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial"><code class="function">gsignond_plugin_request_initial()</code></a> in <em class="parameter"><code>identity_method_cache</code></em>
+ parameter.</p>
+<hr>
+<div class="refsect2">
+<a name="id-1.2.2.6.61"></a><h3>Errors issued via <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#GSignondPlugin-error"><span class="type">“error”</span></a> signal</h3>
+</div>
+<p>At any point in the authorization process the plugin may issue this signal
+with an <em class="parameter"><code>error</code></em>
+ parameter that is a <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a>. The <em class="parameter"><code>error</code></em>
+ has <code class="literal">domain</code> field set to
+<a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/gsignond-Errors.html#GSIGNOND-ERROR:CAPS"><code class="literal">GSIGNOND_ERROR</code></a>. <code class="literal">code</code> field can be one of <code class="literal">GSIGNOND_ERROR_MISSING_DATA</code> 
+(not enough data was supplied in <a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html#gsignond-plugin-request-initial"><code class="function">gsignond_plugin_request_initial()</code></a>),
+<code class="literal">GSIGNOND_ERROR_NOT_AUTHORIZED</code> (there was an error in the authorization
+process), <code class="literal">GSIGNOND_ERROR_USER_INTERACTION</code> (there was an error in the interaction
+with the user), <code class="literal">GSIGNOND_ERROR_SESSION_CANCELED</code> (the authorization process
+was canceled). <code class="literal">message</code> field tells additional details about the exact cause of the
+error, and it's intended to help programming and debugging, but not meant
+to be understood by end users directly (although it can be shown to them).</p>
+</div>
+<div class="refsect1">
+<a name="GSignondOauthPlugin.functions_details"></a><h2>Functions</h2>
+</div>
+<div class="refsect1">
+<a name="GSignondOauthPlugin.other_details"></a><h2>Types and Values</h2>
+<div class="refsect2">
+<a name="GSignondOauthPlugin-struct"></a><h3>struct GSignondOauthPlugin</h3>
+<pre class="programlisting">struct GSignondOauthPlugin;</pre>
+<p>Opaque structure for the OAuth plugin object</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="GSignondOauthPluginClass"></a><h3>struct GSignondOauthPluginClass</h3>
+<pre class="programlisting">struct GSignondOauthPluginClass {
+};
+</pre>
+<p>Opaque structure for the OAuth plugin class</p>
+</div>
+</div>
+<div class="refsect1">
+<a name="GSignondOauthPlugin.see-also"></a><h2>See Also</h2>
+<p><a href="http://gsignon-docs.accounts-sso.googlecode.com/git/gsignond/GSignondPlugin.html"><span class="type">GSignondPlugin</span></a></p>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.20</div>
+</body>
+</html>

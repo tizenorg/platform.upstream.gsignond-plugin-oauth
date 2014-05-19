@@ -1,0 +1,5 @@
+* Wed Mar 19 2014 Jussi Laako <jussi.laako@linux.intel.com>
+- Update to 1.0.0 release
+
+* Fri Aug 23 2013 Amarnath Valluri <amarnath.valluri@linux.intel.com>
+- Initial RPM packaging
