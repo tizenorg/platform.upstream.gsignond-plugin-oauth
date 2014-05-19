@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE book PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "">
+<book xmlns="http://www.devhelp.net/book" title="gsignond-plugin-oauth Reference Manual" link="index.html" author="" name="gsignond-plugin-oauth" version="2" language="c">
+  <chapters>
+    <sub name="Plugin reference" link="ch01.html">
+      <sub name="GSignondOauthPlugin" link="GSignondOauthPlugin.html"/>
+    </sub>
+    <sub name="Object Hierarchy" link="object-tree.html"/>
+    <sub name="API Index" link="api-index-full.html"/>
+    <sub name="Index of deprecated API" link="deprecated-api-index.html"/>
+  </chapters>
+  <functions>
+    <keyword type="" name="Parameters in gsignond_plugin_request_initial() identity_method_cache" link="GSignondOauthPlugin.html#id-1.2.2.6.20"/>
+    <keyword type="" name="Parameters in gsignond_plugin_request_initial() session_data" link="GSignondOauthPlugin.html#id-1.2.2.6.22"/>
+    <keyword type="" name="Parameters for “user-action-required” signal issued by plugin" link="GSignondOauthPlugin.html#id-1.2.2.6.24"/>
+    <keyword type="" name="Parameters in gsignond_plugin_user_action_finished() ui_data " link="GSignondOauthPlugin.html#id-1.2.2.6.26"/>
+    <keyword type="" name="Token and its parameters in “response-final” signal" link="GSignondOauthPlugin.html#id-1.2.2.6.28"/>
+    <keyword type="" name="Parameters in gsignond_plugin_request_initial() identity_method_cache" link="GSignondOauthPlugin.html#id-1.2.2.6.33"/>
+    <keyword type="" name="Parameters in gsignond_plugin_request_initial() session_data" link="GSignondOauthPlugin.html#id-1.2.2.6.36"/>
+    <keyword type="" name="Parameters for “user-action-required” signal issued by plugin" link="GSignondOauthPlugin.html#id-1.2.2.6.48"/>
+    <keyword type="" name="Parameters in gsignond_plugin_user_action_finished() ui_data " link="GSignondOauthPlugin.html#id-1.2.2.6.51"/>
+    <keyword type="" name="Token and its parameters in “response-final” signal" link="GSignondOauthPlugin.html#id-1.2.2.6.54"/>
+    <keyword type="" name="Parameters of “store” signal" link="GSignondOauthPlugin.html#id-1.2.2.6.58"/>
+    <keyword type="" name="Errors issued via “error” signal" link="GSignondOauthPlugin.html#id-1.2.2.6.61"/>
+    <keyword type="struct" name="struct GSignondOauthPlugin" link="GSignondOauthPlugin.html#GSignondOauthPlugin-struct"/>
+    <keyword type="struct" name="struct GSignondOauthPluginClass" link="GSignondOauthPlugin.html#GSignondOauthPluginClass"/>
+  </functions>
+</book>
